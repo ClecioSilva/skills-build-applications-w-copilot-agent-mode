@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from . import views
+
+import os
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
@@ -28,14 +30,22 @@ router.register(r'activities', views.ActivityViewSet)
 router.register(r'leaderboard', views.LeaderboardViewSet)
 router.register(r'workouts', views.WorkoutViewSet)
 
+
+# Gera URLs absolutas usando a variável de ambiente $CODESPACE_NAME
 @api_view(['GET'])
 def api_root(request, format=None):
+    codespace_name = os.environ.get('CODESPACE_NAME')
+    if codespace_name:
+        base_url = f"https://{codespace_name}-8000.app.github.dev/api/"
+    else:
+        # fallback para localhost
+        base_url = request.build_absolute_uri('/api/')
     return Response({
-        'teams': request.build_absolute_uri('teams/'),
-        'users': request.build_absolute_uri('users/'),
-        'activities': request.build_absolute_uri('activities/'),
-        'leaderboard': request.build_absolute_uri('leaderboard/'),
-        'workouts': request.build_absolute_uri('workouts/'),
+        'teams': base_url + 'teams/',
+        'users': base_url + 'users/',
+        'activities': base_url + 'activities/',
+        'leaderboard': base_url + 'leaderboard/',
+        'workouts': base_url + 'workouts/',
     })
 
 urlpatterns = [
